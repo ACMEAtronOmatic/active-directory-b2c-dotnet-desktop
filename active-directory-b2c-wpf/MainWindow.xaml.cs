@@ -91,6 +91,26 @@ namespace active_directory_b2c_wpf
             }
         }
 
+        private async void ResetPasswordButton_Click(object sender, RoutedEventArgs e)
+        {
+            var app = App.PublicClientApp;
+            try
+            {
+                ResultText.Text = $"Calling API:{App.AuthorityEditProfile}";
+
+                AuthenticationResult authResult = await app.AcquireTokenInteractive(App.ApiScopes)
+                    .WithParentActivityOrWindow(new WindowInteropHelper(this).Handle)
+                    .WithB2CAuthority(App.AuthorityResetPassword)
+                    .WithPrompt(Prompt.NoPrompt) 
+                    .ExecuteAsync(new System.Threading.CancellationToken());
+
+                DisplayUserInfo(authResult);
+            }
+            catch (Exception ex)
+            {
+                ResultText.Text = $"Session has expired, please sign out and back in.{App.AuthorityResetPassword}{Environment.NewLine}{ex}";
+            }
+        }
         private async void CallApiButton_Click(object sender, RoutedEventArgs e)
         {
             AuthenticationResult authResult = null;
@@ -212,6 +232,7 @@ namespace active_directory_b2c_wpf
             {
                 CallApiButton.Visibility = Visibility.Visible;
                 EditProfileButton.Visibility = Visibility.Visible;
+                ResetPasswordButton.Visibility = Visibility.Visible;
                 SignOutButton.Visibility = Visibility.Visible;
 
                 SignInButton.Visibility = Visibility.Collapsed;
@@ -223,6 +244,7 @@ namespace active_directory_b2c_wpf
 
                 CallApiButton.Visibility = Visibility.Collapsed;
                 EditProfileButton.Visibility = Visibility.Collapsed;
+                ResetPasswordButton.Visibility = Visibility.Collapsed;
                 SignOutButton.Visibility = Visibility.Collapsed;
 
                 SignInButton.Visibility = Visibility.Visible;

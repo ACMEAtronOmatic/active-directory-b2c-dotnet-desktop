@@ -36,7 +36,7 @@ namespace active_directory_b2c_wpf
         /// From Azure AD B2C / UserFlows blade
         /// </summary>
         public static string PolicySignUpSignIn = "B2C_1_Licenses_SignUpSignIn";
-        public static string PolicyEditProfile = "NotImplementedYet";
+        public static string PolicyEditProfile = "B2C_1_Licenses_EditProfile";
         public static string PolicyResetPassword = "B2C_1_Licenses_PasswordReset";
 
         /// <summary>
