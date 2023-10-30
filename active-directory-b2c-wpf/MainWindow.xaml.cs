@@ -111,6 +111,10 @@ namespace active_directory_b2c_wpf
                 ResultText.Text = $"Session has expired, please sign out and back in.{App.AuthorityResetPassword}{Environment.NewLine}{ex}";
             }
         }
+        
+        // Example of hitting one of the API endpoints. This is just test code,
+        // not suitable for production and not intended to be used as a reference
+        // or suggestion of usage.
         private async void CallApiButton_Click(object sender, RoutedEventArgs e)
         {
             AuthenticationResult authResult = null;
@@ -152,6 +156,9 @@ namespace active_directory_b2c_wpf
                 }
                 else
                 {
+                    // Just for testing purposes, we use the already implemented "getter". In production,
+                    // the getter should implement a retry policy that uses exponential backoff.
+                    // Polly is a great library for this: http://www.thepollyproject.org/
                     ResultText.Text = await GetHttpContentWithToken(App.ApiEndpoint, authResult.AccessToken);
                     DisplayUserInfo(authResult);
                 }
