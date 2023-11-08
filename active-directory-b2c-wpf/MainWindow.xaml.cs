@@ -6,13 +6,16 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
 using Newtonsoft.Json.Linq;
 using System.Text;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace active_directory_b2c_wpf
 {
@@ -115,7 +118,66 @@ namespace active_directory_b2c_wpf
         // Example of hitting one of the API endpoints. This is just test code,
         // not suitable for production and not intended to be used as a reference
         // or suggestion of usage.
-        private async void CallApiButton_Click(object sender, RoutedEventArgs e)
+        private async void CallQueryLicensesApiButton_Click(object sender, RoutedEventArgs e)
+        {
+            var authResult = await GetPrincipal();
+
+            if (authResult != null)
+            {
+                if (string.IsNullOrEmpty(authResult.AccessToken))
+                {
+                    ResultText.Text = "Access token is null (could be expired). Please do interactive log-in again." ;
+                }
+                else
+                {
+                    // Just for testing purposes, we use the already implemented "getter". In production,
+                    // the getter should implement a retry policy that uses exponential backoff.
+                    // Polly is a great library for this: http://www.thepollyproject.org/
+                    ResultText.Text = await GetHttpContentWithToken(App.QueryLicensesApiEndpoint, authResult.AccessToken);
+                    DisplayUserInfo(authResult);
+                }
+            }
+        }
+
+        private async void CallRegisterLicensesApiButton_Click(object sender, RoutedEventArgs e)
+        {
+            var authResult = await GetPrincipal();
+
+            if (authResult != null)
+            {
+                if (string.IsNullOrEmpty(authResult.AccessToken))
+                {
+                    ResultText.Text = "Access token is null (could be expired). Please do interactive log-in again." ;
+                }
+                else
+                {
+                    // Same consideration as above for retry policy.
+                    
+                    // Refer to https://www.notion.so/acmeaom/Install-Registration-v1-140100ba29dd4330b38cf395b67585a9?pvs=4#318a6ff1dbfa45dcaa5ac87963dcb1ca
+                    // for the format of the request body and meaning of the properties.
+
+                    var registration = new LicenseRegistration
+                    {
+                        VendorId = "11111111111111111111111111111111",
+                        InstallId = Guid.NewGuid().ToString("N"),
+                        CryptographicId = GenerateCid(),
+                        ObjectId = authResult.UniqueId.Replace("-", "")
+                    };
+
+                    ResultText.Text = await PutHttpContent(App.RegisterLicensesApiEndpoint, registration);
+                }
+            }
+        }
+
+        private string GenerateCid()
+        {
+            var randomNumberGenerator = RandomNumberGenerator.Create();
+            var randomBytes = new byte[50];
+            randomNumberGenerator.GetNonZeroBytes(randomBytes);
+            return new Base62Encoder().Encode(randomBytes);
+        }
+
+        private async Task<AuthenticationResult> GetPrincipal()
         {
             AuthenticationResult authResult = null;
             var app = App.PublicClientApp;
@@ -145,24 +207,10 @@ namespace active_directory_b2c_wpf
             catch (Exception ex)
             {
                 ResultText.Text = $"Error Acquiring Token Silently:{Environment.NewLine}{ex}";
-                return;
+                return authResult;
             }
 
-            if (authResult != null)
-            {
-                if (string.IsNullOrEmpty(authResult.AccessToken))
-                {
-                    ResultText.Text = "Access token is null (could be expired). Please do interactive log-in again." ;
-                }
-                else
-                {
-                    // Just for testing purposes, we use the already implemented "getter". In production,
-                    // the getter should implement a retry policy that uses exponential backoff.
-                    // Polly is a great library for this: http://www.thepollyproject.org/
-                    ResultText.Text = await GetHttpContentWithToken(App.ApiEndpoint, authResult.AccessToken);
-                    DisplayUserInfo(authResult);
-                }
-            }
+            return authResult;
         }
 
         /// <summary>
@@ -179,6 +227,40 @@ namespace active_directory_b2c_wpf
             {
                 var request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                response = await httpClient.SendAsync(request);
+                var content = await response.Content.ReadAsStringAsync();
+                return content;
+            }
+            catch (Exception ex)
+            {
+                return ex.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Perform an HTTP GET request to a URL using an HTTP Authorization header
+        /// </summary>
+        /// <param name="url">The URL</param>
+        /// <param name="token">The token</param>
+        /// <returns>String containing the results of the GET operation</returns>
+        public async Task<string> PutHttpContent(string url, LicenseRegistration registration)
+        {
+            var httpClient = new HttpClient();
+            HttpResponseMessage response;
+            try
+            {
+                var request = new HttpRequestMessage(HttpMethod.Put, url);
+
+                request.Content = new StringContent(
+                    JsonSerializer.Serialize(registration), 
+                    Encoding.UTF8, 
+                    "application/json");
+
+                request.Headers.Add("x-functions-key", App.RegisterLicensesKey);
+                
+                // Just for kicks. Add whatever makes sense.
+                request.Headers.UserAgent.Add(new ProductInfoHeaderValue("MyRadar", "4.4.3.6"));
+                
                 response = await httpClient.SendAsync(request);
                 var content = await response.Content.ReadAsStringAsync();
                 return content;
@@ -237,7 +319,8 @@ namespace active_directory_b2c_wpf
         {
             if (signedIn)
             {
-                CallApiButton.Visibility = Visibility.Visible;
+                CallApi1Button.Visibility = Visibility.Visible;
+                CallApi2Button.Visibility = Visibility.Visible;
                 EditProfileButton.Visibility = Visibility.Visible;
                 ResetPasswordButton.Visibility = Visibility.Visible;
                 SignOutButton.Visibility = Visibility.Visible;
@@ -249,7 +332,8 @@ namespace active_directory_b2c_wpf
                 ResultText.Text = "";
                 TokenInfoText.Text = "";
 
-                CallApiButton.Visibility = Visibility.Collapsed;
+                CallApi1Button.Visibility = Visibility.Collapsed;
+                CallApi2Button.Visibility = Visibility.Collapsed;
                 EditProfileButton.Visibility = Visibility.Collapsed;
                 ResetPasswordButton.Visibility = Visibility.Collapsed;
                 SignOutButton.Visibility = Visibility.Collapsed;

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:active_directory_b2c_wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525" Loaded="Window_Loaded">
+        Title="MainWindow" Height="550" Width="725" Loaded="Window_Loaded">
     <Grid Background="Azure">
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
@@ -16,7 +16,8 @@
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button x:Name="SignInButton" Content="Sign In" HorizontalAlignment="Right" Padding="5" Click="SignInButton_Click" Margin="5" FontFamily="Segoe Ui"/>
-            <Button x:Name="CallApiButton" Content="Call API" HorizontalAlignment="Right" Padding="5" Click="CallApiButton_Click" Margin="5" Visibility="Collapsed" FontFamily="Segoe Ui"/>
+            <Button x:Name="CallApi1Button" Content="Call Get Licenses API" HorizontalAlignment="Right" Padding="5" Click="CallQueryLicensesApiButton_Click" Margin="5" Visibility="Collapsed" FontFamily="Segoe Ui"/>
+            <Button x:Name="CallApi2Button" Content="Call Register License API" HorizontalAlignment="Right" Padding="5" Click="CallRegisterLicensesApiButton_Click" Margin="5" Visibility="Collapsed" FontFamily="Segoe Ui"/>
             <Button x:Name="ResetPasswordButton" Content="Reset Password" HorizontalAlignment="Right" Padding="5" Click="ResetPasswordButton_Click" Margin="5" Visibility="Collapsed" FontFamily="Segoe Ui"/>
             <Button x:Name="EditProfileButton" Content="Edit Profile" HorizontalAlignment="Right" Padding="5" Click="EditProfileButton_Click" Margin="5" Visibility="Collapsed" FontFamily="Segoe Ui"/>
             <Button x:Name="SignOutButton" Content="Sign Out" HorizontalAlignment="Right" Padding="5" Click="SignOutButton_Click" Margin="5" Visibility="Collapsed" FontFamily="Segoe Ui"/>

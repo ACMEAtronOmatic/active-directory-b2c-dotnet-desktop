@@ -51,8 +51,20 @@ namespace active_directory_b2c_wpf
         /// <summary>
         /// URL for API which will receive the bearer token corresponding to this authentication
         /// </summary>
-        public static string ApiEndpoint = "https://licenses.acmeaom.com/v1/licenses";
+        public static string QueryLicensesApiEndpoint = "https://licenses.acmeaom.com/v1/licenses";
 
+        /// <summary>
+        /// URL for API which uses claims from the token after authentication. The endpoint is for
+        /// apple, because that is the one that is available right now, but the pattern is the same
+        /// for other platforms.
+        /// </summary>
+        public static string RegisterLicensesApiEndpoint = "https://installs.acmeaom.com/microsoft/v1/installs";
+        
+        // This key is for the example only and will be deleted once the system is in production.
+        public static string RegisterLicensesKey = "DGx29PyU8iCwxTNCHmVw9s16oWtoO8yTN6Scsm7RXbg0AzFuEO94Vw==";
+
+
+        
         // Shouldn't need to change these:
         private static string AuthorityBase = $"https://{AzureAdB2CHostname}/tfp/{Tenant}/";
         public static string AuthoritySignUpSignIn = $"{AuthorityBase}{PolicySignUpSignIn}";

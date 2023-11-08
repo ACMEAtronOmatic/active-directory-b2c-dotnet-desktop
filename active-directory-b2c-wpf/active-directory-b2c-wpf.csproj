@@ -61,6 +61,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Base62Encoder.cs" />
+    <Compile Include="LicenseRegistration.cs" />
     <Compile Include="TokenCacheHelper.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -113,6 +115,9 @@
     </PackageReference>
     <PackageReference Include="System.Private.Uri">
       <Version>4.3.2</Version>
+    </PackageReference>
+    <PackageReference Include="System.Text.Json">
+      <Version>7.0.3</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
