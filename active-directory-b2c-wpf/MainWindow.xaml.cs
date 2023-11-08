@@ -174,7 +174,9 @@ namespace active_directory_b2c_wpf
             var randomNumberGenerator = RandomNumberGenerator.Create();
             var randomBytes = new byte[50];
             randomNumberGenerator.GetNonZeroBytes(randomBytes);
-            return new Base62Encoder().Encode(randomBytes);
+            
+            // Notion doc mentions Base62, but Base64 is okay too.
+            return Convert.ToBase64String(randomBytes);
         }
 
         private async Task<AuthenticationResult> GetPrincipal()
